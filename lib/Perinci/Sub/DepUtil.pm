@@ -1,6 +1,6 @@
 package Perinci::Sub::DepUtil;
 
-use 5.010;
+use 5.010001;
 use strict;
 use warnings;
 
@@ -10,7 +10,7 @@ our @EXPORT_OK = qw(
                        declare_function_dep
                );
 
-our $VERSION = '0.01'; # VERSION
+our $VERSION = '0.02'; # VERSION
 
 sub declare_function_dep {
     my %args    = @_;
@@ -21,15 +21,15 @@ sub declare_function_dep {
     $name =~ /\A\w+\z/
         or die "Invalid syntax on dep's name, please use alphanums only";
 
-    require Rinci::Schema;
-    # XXX merge first or use Perinci::Object, less fragile
-    my $dd = $Rinci::Schema::function->[1]{"[merge+]keys"}{deps}
+    require Sah::Schema::Rinci;
+
+    my $sch = $Sah::Schema::Rinci::SCHEMAS{rinci_function}
         or die "BUG: Schema structure changed (1)";
-    $dd->[1]{keys}
+    my $props = $sch->[1]{_prop}
         or die "BUG: Schema structure changed (2)";
-    $dd->[1]{keys}{$name}
-        and die "Dependency type '$name' is already declared";
-    $dd->[1]{keys}{$name} = $args{schema};
+    $props->{deps}{_prop}{$name}
+        and die "Dep clause '$name' already defined in schema";
+    $props->{deps}{_prop}{$name} = {}; # XXX inject $schema somewhere?
 
     if ($check) {
         require Perinci::Sub::DepChecker;
@@ -41,9 +41,11 @@ sub declare_function_dep {
 1;
 # ABSTRACT: Utility routines for Perinci::Sub::Dep::* modules
 
-
 __END__
+
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -51,7 +53,11 @@ Perinci::Sub::DepUtil - Utility routines for Perinci::Sub::Dep::* modules
 
 =head1 VERSION
 
-version 0.01
+version 0.02
+
+=head1 RELEASE DATE
+
+2014-04-27
 
 =head1 SYNOPSIS
 
@@ -65,16 +71,31 @@ L<Perinci>
 
 Perinci::Sub::Dep::* modules.
 
+=head1 HOMEPAGE
+
+Please visit the project's homepage at L<https://metacpan.org/release/Perinci-Sub-DepUtil>.
+
+=head1 SOURCE
+
+Source repository is at L<https://github.com/sharyanto/perl-Perinci-Sub-DepUtil>.
+
+=head1 BUGS
+
+Please report any bugs or feature requests on the bugtracker website L<https://rt.cpan.org/Public/Dist/Display.html?Name=Perinci-Sub-DepUtil>
+
+When submitting a bug or request, please include a test-file or a
+patch to an existing test-file that illustrates the bug or desired
+feature.
+
 =head1 AUTHOR
 
 Steven Haryanto <stevenharyanto@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Steven Haryanto.
+This software is copyright (c) 2014 by Steven Haryanto.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
